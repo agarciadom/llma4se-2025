@@ -6,31 +6,29 @@
 
 ## Who am I?
 
-* Senior Lecturer in Software Engineering at [Department of Computer Science](https://www.york.ac.uk/computer-science/) of the University of York
+* Senior Lecturer in Software Engineering at the [Department of Computer Science](https://www.york.ac.uk/computer-science/) of the U. of York
 * Researcher at the [Automated Software Engineering](https://www.york.ac.uk/computer-science/research/groups/automated-software-engineering/) research group
 * Work package lead in the [MOSAICO EU project](https://mosaico-project.eu/)
 
 ## What is a Language Model?
 
 * Statistical model which predicts the probability of the next token based on previous ones
-* Uses mechanisms such as *attention* to focus on key parts of the text and improve its predictive capabilities
-* Comes in a range of *parameter sizes*: from Small Language Models that you can run on your own computer, to Large Language Models that may require server-class GPUs to run
+* Uses mechanisms such as *attention* to focus on key parts of the text and improve its predictions
+* Comes in a range of *parameter sizes*:
+  * From small LMs that you can run locally, 
+  * to large LMs that require server-class GPUs
 
-## Limitations of a standalone LM
+## Standalone LM limitations
 
 On its own, an LM:
 
-* Can only rely on its own training set to answer prompts
-* Can only produce an output, not judge it, or perform tasks on your behalf
-* Is limited by its *context window* on how many tokens it can consider at a time
+* Can only rely on its own training set
+* Can only produce an output:
+  * Cannot judge its quality
+  * Cannot perform tasks on your behalf
+* Is limited by its *context window* on how much information it can consider at a time
 
-## The ReAct architecture for LMs
-
-In their ICLR 2023 paper, Yao et al. proposed a prompt engineering approach to improve result quality from LMs:
-
-(include figure from paper, with its various options)
-
-## Agents: building on top of LLMs
+## From LMs to agents
 
 For the purposes of this presentation, we will use the definition from [LangGraph](https://langchain-ai.github.io/langgraph/agents/overview/):
 
@@ -38,29 +36,39 @@ Agent = LM + tools + prompt
 
 A *tool* is a piece of manually written code that an LM can invoke to retrieve information or perform an action on our behalf.
 
-## LM-based applications come in a spectrum
+## LM uses come in a spectrum
 
-We can think of LM uses as being between two extremes:
+We will move between two extremes:
 
-* A fixed workflow with specific steps to follow: more predictable
-* An agentic workflow where the LM decides the steps it must take
+* Fixed workflow: more predictable
+* Agentic workflow: LM plans its own steps
 
-We will start with the first, and move later to the other extreme.
+We will try both approaches in the workshop.
 
-## Other common augmentations for LMs
+## Workflow patterns
 
-* Extending prompt with info from elsewhere (retrieval augmented generation)
-* Involving the user in decision-making (human-in-the-loop)
-* Allowing LM to ask questions back (multi-turn conversations)
-* Managing its short- and long-term memories (avoid exceeding context window)
+(revisit workflow patterns from MOSAICO slides?)
 
-## How to choose within the spectrum?
+## The ReAct architecture
 
-* Consider our preference between predictability and flexibility
+Yao et al. proposed it in [ICLR 2023](https://par.nsf.gov/biblio/10451467)
+
+![ReAct = Reason + Act](img/iclr2023-react.png)
+
+## Choosing within spectrum
+
+* Preference between predictability and flexibility?
 * Consider our LM's capabilities:
-  * We may want to use more prescriptive workflows for SLMs
+  * SLMs: may want more prescriptive workflows
   * LLMs may have sufficient inference power to drive fully-agentic workflows
 * Berkeley hosts a [function calling leaderboard](https://gorilla.cs.berkeley.edu/leaderboard.html)
+
+## Other common augmentations
+
+* Extending prompt with info from elsewhere (retrieval augmented generation)
+* Involving users in decisions (human-in-the-loop)
+* Asking questions back (multi-turn conversations)
+* Explicitly managing agent memories
 
 # Workflows with LangGraph
 
@@ -74,15 +82,9 @@ We will start with the first, and move later to the other extreme.
 
 ## Using tools from LM invocations
 
+## Predefined agents (ReAct)
+
 ## Human-in-the-loop: interrupting for confirmation
-
-# Agentic applications with LangGraph
-
-## The predefined ReAct agent
-
-## Need for observability: LangFuse
-
-## Tradeoffs against predefined workflows
 
 ## Reuse from other systems: LangGraph AP
 
@@ -106,13 +108,13 @@ We will start with the first, and move later to the other extreme.
 
 ## What we covered
 
-* Items
+* Summarise items
 
 ## Thank you!
 
 Materials available here:
 
-[link text](url to materials)
+[Github repository](url to materials)
 
 Contact me:
 
@@ -120,4 +122,4 @@ a.garcia-dominguez AT york.ac.uk
 
 For more information:
 
-https://www-users.york.ac.uk/~agd516/
+[Personal website](https://www-users.york.ac.uk/~agd516/)
