@@ -25,7 +25,7 @@ graph = (
     StateGraph(State)
     .add_node(call_model)
     .add_edge(START, "call_model")
-    .compile(name="Memory-less chatbot")
+    .compile(name="Memory-less chatbot (with thread ID)")
 )
 
 if __name__ == "__main__":

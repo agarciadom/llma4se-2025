@@ -27,7 +27,7 @@ graph = (
     .add_node(call_model)
     .add_edge(START, "call_model")
     .compile(
-        name="Memory-less chatbot",
+        name="Chatbot with in-memory checkpointer",
         checkpointer=InMemorySaver())
 )
 
