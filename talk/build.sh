@@ -3,7 +3,7 @@
 set -e
 
 build() {
-  pandoc -t revealjs -s "$1" --css=slides.css -o index.html
+  pandoc --lua-filter columns.lua -t revealjs -s "$1" --css=slides.css -o index.html
   echo Slides built
 }
 

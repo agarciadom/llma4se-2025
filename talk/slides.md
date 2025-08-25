@@ -30,24 +30,43 @@ On its own, an LM:
 
 ## From LMs to agents
 
-For the purposes of this presentation, we will use the definition from [LangGraph](https://langchain-ai.github.io/langgraph/agents/overview/):
+We will use the definition from [LangGraph](https://langchain-ai.github.io/langgraph/agents/overview/):
 
 Agent = LM + tools + prompt
 
-A *tool* is a piece of manually written code that an LM can invoke to retrieve information or perform an action on our behalf.
+A *tool* is a piece of manually written code that an LM can invoke to retrieve information, or perform an action on our behalf.
 
 ## LM uses come in a spectrum
 
 We will move between two extremes:
 
-* Fixed workflow: more predictable
-* Agentic workflow: LM plans its own steps
+* Fixed workflow: predictable
+* Flexible workflow: LM creates a plan
 
-We will try both approaches in the workshop.
+We will try both approaches in the workshop.<br/>
+Let's see some workflow patterns first.
 
-## Workflow patterns
+<sub><sup>(note: patterns by Anthropic, figures by LangGraph)</sup></sub>
 
-(revisit workflow patterns from MOSAICO slides?)
+## Prompt chaining
+
+![Use several prompts, with handcoded gates](img/prompt-chaining.png)
+
+## Parallelisation
+
+![Multiple concurrent LMs handle subtasks](img/parallelisation.png)
+
+## Routing
+
+![Use LM for handoff to specialised LMs](img/router.png)
+
+## Orchestrator-Worker
+
+![Use LM to decide on task subdivision](img/orchestrator-worker.png)
+
+## Generator-Evaluator
+
+![Use a separate LM to produce feedback](img/generator-evaluator.png)
 
 ## The ReAct architecture
 
@@ -74,41 +93,129 @@ Yao et al. proposed it in [ICLR 2023](https://par.nsf.gov/biblio/10451467)
 
 ## What is LangGraph?
 
-## Implementing states and fixed state transitions
+* Python-based framework for LM-based workflows and agents
+* Core is open-source, with non-OSS extras:
+  * Studio: web-based development environment
+  * Platform: automated deployment of agents
+* Handles state changes and persistence
+* [https://www.langchain.com/langgraph](https://www.langchain.com/langgraph)
 
-## Managing short-term memories as state
+## LangGraph Platform
 
-## Using LM-based transitions
+![We will use CLI, Server, and Studio in the workshop](img/lg-platform.png){width=80%}
 
-## Using tools from LM invocations
+## Core components
+
+Every LG app is made up of:
+
+* Current *state* of the application
+* *Nodes* that update the state
+* *Edges* that decide which node to run next
+
+## Minimal example: Hello X!
+
+(example which takes a name and tries to say Hello and Bye)
+
+## Reducers for state updates
+
+(improve the previous example by using the `add` reducer)
+
+## Conditional edges
+
+(change to a coin-flipping example with coin flip node + diff nodes on head/tails)
+
+## Chatbot: adding an LM
+
+(change to a simple chatbot example, using OpenAI + GPT-4o-mini)
+
+## Adding memory
+
+(add checkpointer + show example where LM has to recall something we said)
+
+## Adding tools
+
+(add tool for searching the web with DuckDuckGo: this relies on conditional edges)
+
+## Multi-turn interactions
+
+(add tool for asking the user for clarification, e.g. someone says they want to decorate their walls but they have not given any hints on what they like)
 
 ## Predefined agents (ReAct)
 
-## Human-in-the-loop: interrupting for confirmation
+::: columns
 
-## Reuse from other systems: LangGraph AP
+::: column
+
+![](img/full-react-agent.svg){width=600px}
+
+:::
+
+::: column
+
+`create_react_agent` can produce the graph on the left
+
+* `pre_model_hook`: before LM (e.g. condense messages)
+* `post_model_hook`: after LM (e.g. guardrails, interrupts)
+* Can ask for structured response (if LM supports it)
+
+:::
+
+:::
+
+## Reuse from other systems: LangGraph SDK
+
+* LangGraph Server wraps a graph around an API
+* LangGraph provides SDKs with clients for the API
+* This allows for reusing an agent from a larger app (e.g. a web client)
+* Checkpointing can be replaced with Postgres + Redis for persistence across restarts
 
 # Agentic applications in Smolagents
 
 ## What is Smolagents?
 
-## MultiStepAgent: ReAct in SmolAgents
+* Open-source agentic framework developed by HuggingFace (Apache 2.0 license)
+* Entirely based on the ReAct loop (no explicit workflows): focus on tool + step callback writing
+* Uses Python-based actions instead of JSON objects
+  * Python runs in a limited environment
+  * Can be further restricted (e.g. to run inside a VM)
 
-## CodeAgent: Pythonic tool calling
+## CodeAct (cited by Smolagents)
 
-## Implementing guardrails in tool calls
+![[Wang et al.](https://huggingface.co/papers/2402.01030) mentioned up to 20% higher success rates](img/codeact.png)
 
-## Incorporating external tools via MCP
+## ReAct in SmolAgents
 
-## Using step callbacks to allow human-in-the-loop
+![Animation from [Smolagents](https://huggingface.co/docs/smolagents/conceptual_guides/react)](img/Agent_ManimCE.gif){width=80%}
 
-## Reuse from other systems: other protocols
+## Minimal example: DB agent
+
+(try managing a MariaDB database using MCP)
+
+## Error reporting from tool calls
+
+(what happens if the SQL is wrong?)
+
+## Callbacks for human-in-the-loop
+
+(ask human for confirmation when inserting a row)
+
+## Reuse: agent protocols
+
+* Smolagents does not have a server of its own
+* Reusing an agent requires a protocol
+* One option: Google [A2A](https://github.com/a2aproject/A2A) (Agent-to-Agent) protocol
+  * Mozilla.ai [any-agent](https://github.com/mozilla-ai/any-agent) can serve Smolagents via A2A
+* Quick plug: MOSAICO is looking at agent protocols
+  * In-house vs A2A vs MCP
+  * A2A ticks most boxes, but not all of them!
 
 # Conclusion
 
 ## What we covered
 
-* Summarise items
+* We have introduced basic LM/agent definitions, workflow building blocks, and ReAct
+* Discussed the LangGraph framework, which supports explicit workflows or ReAct loops
+* Introduced the Smolagents framework, with its ReAct loop and Pythonic tool calling
 
 ## Thank you!
 
@@ -120,6 +227,6 @@ Contact me:
 
 a.garcia-dominguez AT york.ac.uk
 
-For more information:
+More about me:
 
 [Personal website](https://www-users.york.ac.uk/~agd516/)
