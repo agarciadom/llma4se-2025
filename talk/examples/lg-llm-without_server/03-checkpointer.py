@@ -1,12 +1,12 @@
 from typing import Any, Dict
 from langgraph.graph import StateGraph, MessagesState, START
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage
 from langgraph.checkpoint.memory import InMemorySaver
+from langchain.chat_models import init_chat_model
+from langchain_core.messages import HumanMessage
 
 
-llm = ChatOpenAI(
-    model="gpt-4o-mini",
+llm = init_chat_model(
+    "gpt-4o-mini",
     temperature=0.1,
     timeout=10,
     max_tokens=5_000
