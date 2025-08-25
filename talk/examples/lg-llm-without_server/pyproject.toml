@@ -1,0 +1,11 @@
+[project]
+name = "chat-noserver"
+version = "0.1.0"
+description = "Basic LangGraph examples running directly with and without a checkpointer."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "langchain>=0.3.27",
+    "langchain-openai>=0.3.31",
+    "langgraph>=0.6.6",
+]

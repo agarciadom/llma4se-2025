@@ -1,0 +1,17 @@
+[project]
+name = "chat-lgserver"
+version = "0.0.1"
+description = "Basic LangGraph example using LangGraph Server and its built-in checkpointer."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "langchain>=0.3.27",
+    "langchain-openai>=0.3.31",
+    "langgraph>=0.6.6",
+    "python-dotenv>=1.0.1",
+]
+
+[dependency-groups]
+dev = [
+    "langgraph-cli[inmem]>=0.3.8",
+]
