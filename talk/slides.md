@@ -134,11 +134,11 @@ Every LG app is made up of:
 
 ## Adding tools
 
-(add tool for searching the web with DuckDuckGo: this relies on conditional edges)
+(add tool for searching the web with DuckDuckGo MCP server, asking the population of Madrid and then a follow-up question)
 
-## Multi-turn interactions
+## Human-in-the-loop
 
-(add tool for asking the user for clarification, e.g. someone says they want to decorate their walls but they have not given any hints on what they like)
+(add tool for asking the user for confirmation, e.g. before actually "buying" something)
 
 ## Predefined agents (ReAct)
 

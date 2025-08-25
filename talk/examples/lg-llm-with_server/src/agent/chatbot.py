@@ -23,5 +23,5 @@ graph = (
     StateGraph(State)
     .add_node(call_model)
     .add_edge(START, "call_model")
-    .compile(name="Memory-less chatbot")
+    .compile(name="Chatbot from LangGraph Server")
 )
