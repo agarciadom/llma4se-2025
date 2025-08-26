@@ -93,11 +93,10 @@ Yao et al. proposed it in [ICLR 2023](https://par.nsf.gov/biblio/10451467)
 
 ## What is LangGraph?
 
-* Python-based framework for LM-based workflows and agents
+* Python-based framework for LM-based workflows and agents, with rewinding and human-in-the-loop
 * Core is open-source, with non-OSS extras:
   * Studio: web-based development environment
   * Platform: automated deployment of agents
-* Handles state changes and persistence
 * [https://www.langchain.com/langgraph](https://www.langchain.com/langgraph)
 
 ## LangGraph Platform
@@ -112,33 +111,320 @@ Every LG app is made up of:
 * *Nodes* that update the state
 * *Edges* that decide which node to run next
 
-## Minimal example: Hello X!
+## Minimal example: state + nodes
 
-(example which takes a name and tries to say Hello and Bye)
+```python
+class State(TypedDict):
+    user_name: str
+    messages: list[str]
+
+def hello(state: State) -> State:
+    return { "messages": ["Hello {}!".format(state["user_name"])] }
+
+def bye(state: State) -> State:
+    return { "messages": ["Bye {}!".format(state["user_name"])] }
+```
+
+We create a state schema, and define two nodes.
+
+## Minimal example: graph setup
+
+```python
+builder = StateGraph(State)
+builder.add_node("hello", hello)
+builder.add_node("bye", bye)
+builder.add_edge(START, "hello")
+builder.add_edge("hello", "bye")
+builder.add_edge("bye", END)
+
+graph = builder.compile()
+```
+
+We populate and compile the graph.
+
+## Minimal example: execution
+
+Now we run the graph:
+
+```python
+print(graph.invoke(State(user_name="Antonio")))
+```
+
+We get the final state:
+
+```python
+{'user_name': 'Antonio', 'messages': ['Bye Antonio!']}
+```
+
+Where did our hello go?
 
 ## Reducers for state updates
 
-(improve the previous example by using the `add` reducer)
+* Nodes propose changes to state fields
+* new_state = reducer(old_state, changes)
 
-## Conditional edges
+If we change the `messages` in `State` to:
 
-(change to a coin-flipping example with coin flip node + diff nodes on head/tails)
+```python
+messages: Annotated[list[str], add]
+```
+
+Now our final state is:
+
+```python
+{'user_name': 'Antonio', 'messages': ['Hello Antonio!', 'Bye Antonio!']}
+```
+
+## Common case: MessagesState
+
+* Given the LM focus, `messages` is so common that there is a predefined `MessagesState` with it
+* In `MessagesState`, the default `add_messages` reducer allows for updating messages with same ID
+
+## Conditional edges (I)
+
+```python
+class State(TypedDict):
+    flip_result: bool
+    messages: list[str]
+
+def flip_coin(_: State) -> State:
+    return { "flip_result": random() < 0.5 }
+
+def flipped_heads(state: State) -> State:
+    return { "messages": [ "You flipped heads!" ]}
+
+def flipped_tails(state: State) -> State:
+    return { "messages": [ "You flipped tails!" ]}
+```
+
+How to transition based on a state condition?
+
+## Conditional edges (II)
+
+```python
+def use_flip_result(state: State) -> Literal["flipped_heads", "flipped_tails"]:
+    return "flipped_heads" if state["flip_result"] else "flipped_tails"
+
+builder = StateGraph(State)
+# ... nodes ...
+# ... other edges ...
+builder.add_conditional_edges("flip_coin", use_flip_result)
+```
+
+We add a conditional edge for this.
+The type annotations are useful for generating diagrams.
 
 ## Chatbot: adding an LM
 
-(change to a simple chatbot example, using OpenAI + GPT-4o-mini)
+Now we want to use GPT-4o-mini:
 
-## Adding memory
+```python
+llm = init_chat_model("gpt-4o-mini")
+class State(MessagesState):
+    pass
 
-(add checkpointer + show example where LM has to recall something we said)
+def call_model(state: State) -> Dict[str, Any]:
+    return { "messages": llm.invoke(state["messages"]) }
 
-## Adding tools
+graph = (StateGraph(State)
+    .add_node(call_model)
+    .add_edge(START, "call_model")
+    .compile(name="Memory-less chatbot"))
+```
 
-(add tool for searching the web with DuckDuckGo MCP server, asking the population of Madrid and then a follow-up question)
+What happens if we try to talk to it?
 
-## Human-in-the-loop
+## Chatbot without memory
 
-(add tool for asking the user for confirmation, e.g. before actually "buying" something)
+First interaction:
+
+```text
+== Human Message =================================
+Hello, my name is Antonio!
+== Ai Message ==================================
+Hello, Antonio! How can I assist you today?
+```
+
+Second interaction:
+```text
+== Human Message =================================
+Do you remember my name?
+== Ai Message ==================================
+I don’t have the ability to remember personal information or previous interactions. Each conversation is treated independently. How can I assist you today?
+```
+
+## Adding memory: checkpointers
+
+* LG supports conversation *threads*
+* A checkpointer persists thread-scoped state
+
+```python
+graph = (StateGraph(State)
+    .add_node(call_model)
+    .add_edge(START, "call_model")
+    .compile(
+        name="Chatbot with in-memory checkpointer",
+        checkpointer=InMemorySaver()))
+```
+
+We set up a graph with memory-based checkpointing.
+LG Server supports SQLite and Postgres checkpointing.
+
+## Adding memory: thread IDs
+
+We need to mention the thread ID during invocations:
+
+```python
+result = graph.invoke(
+    State(messages=[HumanMessage(content="...")]),
+    config={"configurable": {"thread_id": thread_id}}
+)
+```
+
+Thread ID is up to us, but it's usually a UUID.
+
+## Adding memory: result
+
+First interaction with thread ID 1:
+
+```text
+H: Hello, my name is Antonio!
+AI: Hello, Antonio! How can I assist you today?
+```
+
+Second interaction with thread ID 1:
+```text
+H: Hello, my name is Antonio!
+AI: Hello, Antonio! How can I assist you today?
+H: Do you remember my name?
+AI: Yes, your name is Antonio! How can I help you today?
+```
+
+The messages from the original interaction were re-sent together with the second interaction.
+
+## Managing history
+
+* Overly long threads risk the LLM losing focus, and consume more tokens
+* We could trim or summarise previous messages (e.g. using LM once history goes over a threshold)
+* `add_messages` supports `RemoveMessage(id=N)` for deleting messages
+
+## Tools: define
+
+A tool can be just a decorated Python function:
+
+```python
+@tool
+def multiply(left, right):
+    """
+    Multiplies the left operand by the right operand, and returns the result.
+    """
+    return left * right
+```
+
+## Tools: bind
+
+We need to bind tools to the LM, so it is told about the available tools upon invocation:
+
+```python
+llm = init_chat_model("gpt-4o-mini")
+tools = [multiply]
+llm_with_tools = llm.bind_tools(tools)
+```
+
+## Tools: node and edges
+
+```python
+graph = (StateGraph(State)
+    .add_node(call_model)
+    .add_node("tools", ToolNode(tools))
+    .add_edge(START, "call_model")
+    .add_conditional_edges("call_model", tools_condition)
+    .add_edge("tools", "call_model")
+    .compile(...))
+```
+
+* Need node that executes tools requested by LM
+* Need edge that decides when to visit that node
+* LG has predefined implementations for those
+
+## Tools: example run
+
+```text
+H: What is the result of 40 times 3?
+
+AI:
+  Tool Calls:
+    multiply (call_eEamAVQRuhRXeeomX7wcyt90)
+   Call ID: call_eEamAVQRuhRXeeomX7wcyt90
+    Args:
+      left: 40
+      right: 3
+
+Tool (multiply): 120
+AI: The result of 40 times 3 is 120.
+```
+
+Since the agent has a checkpointer, we could ask for further multiplying the result over and over.
+
+## Tools: MCP
+
+Anthropic created the [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) to standardise integrating LMs with external services.
+
+How about the DuckDuckGo search engine?
+
+```python
+client = MultiServerMCPClient({
+  "ddg": {
+    "command": "uvx",
+    "args": ["duckduckgo-mcp-server"],
+    "transport": "stdio"
+  }
+})
+tools = await client.get_tools()
+llm_with_tools = llm.bind_tools(tools)
+```
+
+## Trying out DuckDuckGo
+
+Some example queries:
+
+* What is the population of Madrid?
+* What will be its population in 2050?
+* What are the most popular first names in France?
+
+Sometimes the search is not quite right...
+
+## Human-in-the-loop scenarios
+
+We need to involve users in decision-making:
+
+* Approval of high-impact actions
+* Correction of the graph state
+* Clarification / extra input from the human
+
+## Interrupting search requests
+
+```python
+@tool(...)
+async def search_with_permission(config: RunnableConfig, **tool_input):
+  request = HumanInterrupt(...)
+  response = interrupt(request)
+  if response["type"] == "accept":
+    return await search_tool.ainvoke(tool_input, config)
+  elif response["type"] == "response":
+    return "The user interrupted the search request, and gave thifeedback:\n".format(response["args"])
+  else:
+    raise ValueError("Unknown response type {}".format(respon["type"])
+
+tools = [search_with_permission, fetch_tool]
+llm_with_tools = llm.bind_tools(tools)
+```
+
+Let's try this out.
+
+## Interrupted search
+
+![We can correct the outdated year (likely from its training set?) before the search is performed.](img/interrupted-search.png){width=33%}
 
 ## Predefined agents (ReAct)
 
@@ -168,6 +454,12 @@ Every LG app is made up of:
 * LangGraph provides SDKs with clients for the API
 * This allows for reusing an agent from a larger app (e.g. a web client)
 * Checkpointing can be replaced with Postgres + Redis for persistence across restarts
+
+## Beyond this talk
+
+* Time travel (replay from a previous point)
+* Subgraphs (for reuse and encapsulation)
+* Multi-agents (for specialisation)
 
 # Agentic applications in Smolagents
 

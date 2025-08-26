@@ -6,3 +6,7 @@
 .reveal h2 {
     text-transform: none;
 }
+
+.reveal .sourceCode {
+    overflow: auto;
+}
