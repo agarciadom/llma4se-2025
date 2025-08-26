@@ -2,7 +2,8 @@
   "dependencies": ["."],
   "graphs": {
     "chatbot": "./src/agent/chatbot.py:graph",
-    "searcher": "./src/agent/searcher.py:make_graph"
+    "searcher": "./src/agent/searcher.py:make_graph",
+    "interruptible": "./src/agent/interruptible_searcher.py:make_graph"
   },
   "env": ".env",
   "image_distro": "wolfi"
