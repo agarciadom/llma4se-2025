@@ -1,0 +1,10 @@
+[project]
+name = "llma4se-2025-smolagents"
+version = "0.1.0"
+description = "Smolagents-based examples for LLMA4SE talk"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "duckduckgo-mcp-server>=0.1.1",
+    "smolagents[mcp,openai]>=1.21.2",
+]
