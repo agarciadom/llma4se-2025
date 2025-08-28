@@ -4,25 +4,71 @@
 
 # Preparation
 
-## Initial dependencies
+## Software requirements
 
-* Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) or [Podman Desktop](https://podman.io/).
-* Install [uv](https://github.com/astral-sh/uv)
-  * This will be our dependency management tool for Python.
-* Install [Ollama](https://ollama.com/download)
-  * We will use this to run LLMs locally, while exposing them using an API similar to that of OpenAI's products
-  * Once installed, pull an LLM model - some options:
-    * `ollama pull gpt-oss:20b`
-    * `ollama pull qwen3:4b`
-* Clone Github repository with workshop materials
+* [Git](https://git-scm.com/) client for cloning the repo with the materials
+* A recent version of Python 3 (v3.10 or newer)
+* [uv](https://github.com/astral-sh/uv) Python dependency manager
+  * Install using the website's [instructions](https://docs.astral.sh/uv/getting-started/installation/)
+* [Docker Desktop](https://www.docker.com/products/docker-desktop/) or [Podman Desktop](https://podman.io/)
+  * For running containers (e.g. MCP servers)
+
+## Third-party systems
+
+* We need an OpenAI API key
+  * For GPT-4o-mini access
+  * To be provided by organizers
+* We need a [LangSmith](https://eu.smith.langchain.com/) API key
+  * For observability of LM calls
+  * Let's sign up and create an API key
+
+## LangSmith: signing up
+
+![Login/Signup for LangSmith EU](img/langsmith-login.png){width=50%}
+
+## LangSmith: creating API key
+
+::: columns
+
+::: column
+
+![](img/langsmith-create-token.png)
+
+:::
+
+::: column
+
+* Go to Settings - API Keys
+* Create a Personal Access Token (e.g. 30d expiry)
+* Save the API key to a safe place for now
+
+:::
+:::
+
+## Cloning the workshop materials
+
+Clone [this Git repository](https://github.com/agarciadom/llma4se-2025) with the materials:
+
+```bash
+git clone https://github.com/agarciadom/llma4se-2025.git
+```
 
 ## Testing your environment
 
-For now, try to give some prompts to your LLM using Ollama's desktop client.
+Let's try running one of the talk examples.
 
-If it takes too long to produce an answer, consider an LLM with fewer weights.
+```bash
+cd talk/examples/lg-llm-with_server/
+cp .env.template .env
+# edit .env with your OpenAI and LangSmith API keys
+./run-server.sh
+```
+
+Try asking a question to the `searcher` agent. For example: "How far is Madrid from Dusseldorf?".
 
 # Building a travel planner agent
+
+## Outline
 
 Work attendees through a LangGraph-powered travel planner agent:
 
@@ -32,6 +78,8 @@ Work attendees through a LangGraph-powered travel planner agent:
 * Fourth step is to add a way to revise the travel plan based on a suggestion from the user, without every time passing the whole message history to the LLM
 
 # Requirements management agent
+
+## Outline
 
 In this case, we would work through a more free-form agent that would have tools for building up a set of requirements:
 
@@ -47,8 +95,6 @@ In this case, we would work through a more free-form agent that would have tools
 * Fifth iteration
 
 
-# Observability with LangFuse
-
 # Conclusion
 
 ## What we covered
@@ -56,10 +102,6 @@ In this case, we would work through a more free-form agent that would have tools
 * Items
 
 ## Thank you!
-
-Materials available here:
-
-[link text](url to materials)
 
 Contact me:
 

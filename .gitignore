@@ -1,6 +1,12 @@
 .DS_Store
-index.html
 .env
+.venv
+
+.idea
+.vscode
 
 *.pyc
+*.egg-info
 .langgraph_api
+
+index.html
