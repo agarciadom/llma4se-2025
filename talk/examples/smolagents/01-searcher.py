@@ -1,10 +1,11 @@
 import os
 
 from smolagents import OpenAIServerModel, CodeAgent, MCPClient
+from smolagents.default_tools import VisitWebpageTool
 from mcp import StdioServerParameters
 
 model = OpenAIServerModel(
-    model_id="gpt-4o",
+    model_id="gpt-4o-mini",
     api_key=os.environ["OPENAI_API_KEY"]
 )
 
@@ -17,7 +18,7 @@ try:
     mcp_client = MCPClient(server_parameters)
     tools = mcp_client.get_tools()
     agent = CodeAgent(
-        tools=tools,
+        tools=[tools[0], VisitWebpageTool()],
         model=model,
         max_steps=10
     )

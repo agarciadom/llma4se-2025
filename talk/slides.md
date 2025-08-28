@@ -267,8 +267,8 @@ graph = (StateGraph(State)
         checkpointer=InMemorySaver()))
 ```
 
-We set up a graph with memory-based checkpointing.
-LG Server supports SQLite and Postgres checkpointing.
+We set up a graph with memory-based checkpointing
+(SQLite and Postgres can also be used with Server).
 
 ## Adding memory: thread IDs
 
@@ -479,17 +479,129 @@ Let's try this out.
 
 ![Animation from [Smolagents](https://huggingface.co/docs/smolagents/conceptual_guides/react)](img/Agent_ManimCE.gif){width=80%}
 
-## Minimal example: DB agent
+## Search: OpenAI + DDG MCP
 
-(try managing a MariaDB database using MCP)
+```python
+model = OpenAIServerModel(
+    model_id="gpt-4o-mini",
+    api_key=os.environ["OPENAI_API_KEY"]
+)
 
-## Error reporting from tool calls
+server_parameters = StdioServerParameters(
+    command='uvx',
+    args=['duckduckgo-mcp-server']
+)
+```
 
-(what happens if the SQL is wrong?)
+We set up GPT-4o-mini and the DDG MCP server.
 
-## Callbacks for human-in-the-loop
+## Search with CodeAgent
 
-(ask human for confirmation when inserting a row)
+```python
+    mcp_client = MCPClient(server_parameters)
+    tools = mcp_client.get_tools()
+    agent = CodeAgent(
+        tools=[tools[0], VisitWebpageTool()],
+        model=model,
+        max_steps=10
+    )
+    agent.run(
+        "What are the three most popular first names in France, for boys and girls? "
+        + "If you struggle with a specific website, try another.")
+```
+
+MCP search + Smolagents `visit_webpage`
+
+(Smolagents had trouble with MCP `fetch_content`)
+
+## Search: execution (I)
+
+![First attempt runs into trouble: the tool function wants keyword arguments](img/smolagents-search-01.png)
+
+## Search: execution (II)
+
+![LM fixes the Python code to use keyword arguments](img/smolagents-search-02.png)
+
+## Search: execution (III)
+
+![LM fetches and prints the website](img/smolagents-search-03.png)
+
+## Search: execution (IV)
+
+![LM structures the output as a Python dictionary: call to `final_answer` tool ends the ReAct loop](img/smolagents-search-04.png)
+
+## Tool metadata: visit_webpage
+
+```python
+class VisitWebpageTool(Tool):
+    name = "visit_webpage"
+    description = (
+        "Visits a webpage at the given url and reads its content as a markdown string. Use this to browse webpages."
+    )
+    inputs = {
+        "url": {
+            "type": "string",
+            "description": "The url of the webpage to visit.",
+        }
+    }
+    output_type = "string"
+```
+
+We feed tool metadata (what it does, what it takes, and what it produces) to the LM.
+
+## Tool feedback: visit_webpage
+
+```python
+class VisitWebpageTool(Tool):
+    def forward(self, url: str) -> str:
+        # ...
+        try:
+            response = requests.get(url, timeout=20)
+            response.raise_for_status()  # Raise an exception for bad status codes
+            # ...
+            return self._truncate_content(markdown_content, self.max_output_length)
+        except requests.exceptions.Timeout:
+            return "The request timed out. Please try again later or check the URL."
+        except RequestException as e:
+            return f"Error fetching the webpage: {str(e)}"
+        except Exception as e:
+            return f"An unexpected error occurred: {str(e)}"
+```
+
+Good tools provide clear feedback to LLM
+
+## Clarification from user in a tool
+
+```python
+class UserInputSearch(Tool):
+    # ...
+    def forward(self, query: str, max_results: int):
+        updated_query = input(f"The agent is about to search '{query}'.\nIf this is OK, press Enter, otherwise type the changed query: ")
+        if updated_query:
+            query = updated_query
+            print(f"Updated query to {query}")
+        return self.base_search(query=query, max_results=max_results)
+```
+
+* We use a custom tool that calls `input`
+* This only really works in a local, interactive setting!
+
+## Docker executor
+
+```python
+with CodeAgent(
+    # ...
+    executor_type="docker",
+    executor_kwargs={
+        "build_new_image": False,
+        "image_name": "jupyter-kernel-custom"
+    }
+) as agent:
+  agent.run(...)
+```
+
+* Safer to run code on a sandbox like Docker
+* Rough edges: MCP tools didn't work, needed custom `Dockerfile`
 
 ## Reuse: agent protocols
 
@@ -500,6 +612,19 @@ Let's try this out.
 * Quick plug: MOSAICO is looking at agent protocols
   * In-house vs A2A vs MCP
   * A2A ticks most boxes, but not all of them!
+
+## Smolagents vs LangGraph
+
+* Pythonic tool-calling can be very powerful:
+  * Can use loops, conditionals, expressions
+  * Well-suited to SLMs (e.g. Qwen2.5-coder:32B)
+* Smolagents is much simpler:
+  * No persistence, and no server
+  * Focused on interactive local use
+* LangGraph is stronger at longer, persistent flows:
+  * Explicit workflow definitions
+  * State persistence via checkpoints
+  * Long-term memories via [stores](https://langchain-ai.github.io/langgraph/concepts/memory/#collection)
 
 # Conclusion
 
@@ -513,7 +638,7 @@ Let's try this out.
 
 Materials available here:
 
-[Github repository](url to materials)
+[Github repository](https://github.com/agarciadom/llma4se-2025)
 
 Contact me:
 
