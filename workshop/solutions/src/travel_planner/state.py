@@ -8,7 +8,6 @@ def first_value(a, b):
     return a or b
 
 
-@dataclass
 class State(MessagesState):
     departure_country: str = None
     departure_city: str = None

@@ -14,7 +14,7 @@ from travel_planner.context import ContextSchema
 from travel_planner.state import State, details_known
 from langchain.chat_models import init_chat_model
 
-from langgraph.graph import StateGraph
+from langgraph.graph import StateGraph, MessagesState
 from langgraph.runtime import get_runtime
 
 
@@ -175,7 +175,7 @@ async def summary_report(state: State) -> Dict[str, Any]:
 
 
 graph = (
-    StateGraph(State, context_schema=ContextSchema)
+    StateGraph(State, input_schema=MessagesState, context_schema=ContextSchema)
     .add_node(identify_destination)
     .add_node("find_travel_instructions", subgraph_for_prompt_template("instructions", TRIP_INSTRUCTIONS_TEMPLATE))
     .add_node("find_things_to_do", subgraph_for_prompt_template("suggestions", TRIP_THINGS_TO_DO_TEMPLATE))
