@@ -9,7 +9,7 @@ from travel_planner.state import State
 def node(state: State) -> Dict[str, Any]:
     return {}
 
-# Exercise: replace this with a prebuilt React
+# Exercise: replace this with a travel planner
 # agent with Tavily tool for search.
 graph = (
     StateGraph(State)
