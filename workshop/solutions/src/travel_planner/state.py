@@ -1,20 +1,18 @@
-
-from dataclasses import dataclass
-from typing import Annotated
-
 from langgraph.graph import MessagesState
+from typing_extensions import Annotated
 
-def first_value(a, b):
-    return a or b
+
+def prefer_new(old_value, new_value):
+    return new_value or old_value
 
 
 class State(MessagesState):
-    departure_country: str = None
-    departure_city: str = None
-    destination_country: str = None
-    destination_city: str = None
-    instructions: Annotated[str, first_value] = None
-    suggestions: Annotated[str, first_value] = None
+    departure_country: Annotated[str, prefer_new]
+    departure_city: Annotated[str, prefer_new]
+    destination_country: Annotated[str, prefer_new]
+    destination_city: Annotated[str, prefer_new]
+    instructions: Annotated[str, prefer_new]
+    suggestions: Annotated[str, prefer_new]
 
 
 def details_known(state: State) -> bool:

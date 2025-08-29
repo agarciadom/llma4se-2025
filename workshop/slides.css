@@ -10,3 +10,7 @@
 .reveal .sourceCode {
     overflow: auto;
 }
+
+.reveal code {
+    font-size: 90%;
+}

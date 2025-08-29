@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Any, Dict, cast, Optional, Callable, Literal
 
 from langchain_core.messages import AIMessage, HumanMessage
@@ -18,7 +17,6 @@ from langgraph.graph import StateGraph, MessagesState
 from langgraph.runtime import get_runtime
 
 
-@dataclass
 class TripDetails(BaseModel):
     departure_city: Optional[str] = None
     departure_country: Optional[str] = None
@@ -104,25 +102,18 @@ async def identify_destination(state: State) -> Dict[str, Any]:
         TRIP_DETAILS_TEMPLATE.format(query=state['messages'][-1].content)
     )
     location = cast(TripDetails, output)
+    return location.model_dump(exclude_none=True, exclude_unset=True)
 
-    updates = location.model_dump(exclude_none=True, exclude_unset=True)
-    if not location.departure_country and 'departure_country' not in state:
-            return {"messages": [AIMessage(content='Which country will you be travelling from?')]} | updates
-    elif not location.departure_city and 'departure_city' not in state:
-            return {"messages": [AIMessage(content='Which city will you be travelling from?')]} | updates
-    elif not location.destination_country and 'destination_country' not in state:
-            return {"messages": [AIMessage(content='Which country will you be travelling to?')]} | updates
-    elif not location.destination_city and 'destination_city' not in state:
-            return {"messages": [AIMessage(content='Which city will you be travelling to?')]} | updates
 
-    if updates:
-        return {
-            "messages": [
-                AIMessage(TRIP_DETAILS_UPDATE_TEMPLATE.format(**(state | updates)))
-            ]
-        } | updates
-
-    return updates
+def ask_for_details(state: State) -> Dict[str, Any]:
+    if state.get('departure_country') is None:
+         return {"messages": [AIMessage(content='Which country will you be travelling from?')]}
+    elif state.get('departure_city') is None:
+         return {"messages": [AIMessage(content='Which city will you be travelling from?')]}
+    elif state.get('destination_country') is None:
+         return {"messages": [AIMessage(content='Which country will you be travelling to?')]}
+    else:
+        return {"messages": [AIMessage(content='Which city will you be travelling to?')]}
 
 
 def destination_approval(state: State) -> Command[Literal["destination_identified", "identify_destination"]]:
@@ -133,9 +124,7 @@ def destination_approval(state: State) -> Command[Literal["destination_identifie
         return Command(goto="destination_identified")
     else:
         return Command(goto="identify_destination",
-                       update={
-                        "messages": [HumanMessage(content=feedback)]
-                       })
+                       update={"messages": [HumanMessage(content=feedback)]})
 
 
 # This is just a marker for concurrent branching
@@ -177,13 +166,15 @@ async def summary_report(state: State) -> Dict[str, Any]:
 graph = (
     StateGraph(State, input_schema=MessagesState, context_schema=ContextSchema)
     .add_node(identify_destination)
-    .add_node("find_travel_instructions", subgraph_for_prompt_template("instructions", TRIP_INSTRUCTIONS_TEMPLATE))
-    .add_node("find_things_to_do", subgraph_for_prompt_template("suggestions", TRIP_THINGS_TO_DO_TEMPLATE))
+    .add_node(ask_for_details)
     .add_node(destination_approval)
     .add_node(destination_identified)
+    .add_node("find_travel_instructions", subgraph_for_prompt_template("instructions", TRIP_INSTRUCTIONS_TEMPLATE))
+    .add_node("find_things_to_do", subgraph_for_prompt_template("suggestions", TRIP_THINGS_TO_DO_TEMPLATE))
     .add_node(summary_report)
     .add_edge(START, "identify_destination")
-    .add_conditional_edges("identify_destination", details_known, {False: END, True: "destination_approval"})
+    .add_conditional_edges("identify_destination", details_known, {False: "ask_for_details", True: "destination_approval"})
+    .add_edge("ask_for_details", END)
     .add_edge("destination_identified", "find_travel_instructions")
     .add_edge("destination_identified", "find_things_to_do")
     .add_edge("find_travel_instructions", "summary_report")
