@@ -1,0 +1,9 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "prebuilt_searcher": "./src/prebuilt_searcher/graph.py:graph",
+    "travel_planner": "./src/travel_planner/graph.py:graph"
+  },
+  "env": ".env",
+  "image_distro": "wolfi"
+}
