@@ -156,12 +156,12 @@ We get the final state:
 {'user_name': 'Antonio', 'messages': ['Bye Antonio!']}
 ```
 
-Where did our hello go?
+Where did our "Hello" go?
 
 ## Reducers for state updates
 
-* Nodes propose changes to state fields
-* new_state = reducer(old_state, changes)
+* Nodes return changes to state fields
+* new_state = reducer(old_state, change)
 
 If we change the `messages` in `State` to:
 
@@ -253,10 +253,24 @@ Do you remember my name?
 I don’t have the ability to remember personal information or previous interactions. Each conversation is treated independently. How can I assist you today?
 ```
 
-## Adding memory: checkpointers
+## Adding memory: thread IDs
 
 * LG supports conversation *threads*
-* A checkpointer persists thread-scoped state
+* We mention the thread ID during invocations
+
+```python
+result = graph.invoke(
+    State(messages=[HumanMessage(content="...")]),
+    config={"configurable": {"thread_id": thread_id}}
+)
+```
+
+* Thread ID is up to us, but it's usually a UUID
+* This is not enough, though: let's check
+
+## Adding memory: checkpointers
+
+A *checkpointer* persists thread-scoped state
 
 ```python
 graph = (StateGraph(State)
@@ -269,19 +283,6 @@ graph = (StateGraph(State)
 
 We set up a graph with memory-based checkpointing
 (SQLite and Postgres can also be used with Server).
-
-## Adding memory: thread IDs
-
-We need to mention the thread ID during invocations:
-
-```python
-result = graph.invoke(
-    State(messages=[HumanMessage(content="...")]),
-    config={"configurable": {"thread_id": thread_id}}
-)
-```
-
-Thread ID is up to us, but it's usually a UUID.
 
 ## Adding memory: result
 
@@ -452,7 +453,7 @@ Let's try this out.
 
 * LangGraph Server wraps a graph around an API
 * LangGraph provides SDKs with clients for the API
-* This allows for reusing an agent from a larger app (e.g. a web client)
+* This allows for reusing an agent from a larger app (e.g. a web client, like Studio)
 * Checkpointing can be replaced with Postgres + Redis for persistence across restarts
 
 ## Beyond this talk
@@ -460,6 +461,7 @@ Let's try this out.
 * Time travel (replay from a previous point)
 * Subgraphs (for reuse and encapsulation)
 * Multi-agents (for specialisation)
+* Long-term memories via a *store*
 
 # Agentic applications in Smolagents
 
@@ -516,11 +518,16 @@ MCP search + Smolagents `visit_webpage`
 
 ## Search: execution (I)
 
-![First attempt runs into trouble: the tool function wants keyword arguments](img/smolagents-search-01.png)
+![](img/smolagents-search-01.png)
+
+* First attempt runs into trouble: the tool function wants keyword arguments
+* Issue in Smolagents' current MCP integration
 
 ## Search: execution (II)
 
 ![LM fixes the Python code to use keyword arguments](img/smolagents-search-02.png)
+
+Not ideal, though - you'll want your tool function to be more flexible, or provide clearer hints to use keyword arguments in prompt.
 
 ## Search: execution (III)
 

@@ -24,6 +24,7 @@ try:
     )
     agent.run(
         "What are the three most popular first names in France, for boys and girls? "
-        + "If you struggle with a specific website, try another.")
+        + "If you struggle with a specific website, try another.\n"
+        + "To use the search tool, use always keyword arguments.")
 finally:
     mcp_client.disconnect()
