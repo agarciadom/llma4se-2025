@@ -1,10 +1,13 @@
 from typing import Any, Dict
+from dotenv import load_dotenv
 from langgraph.graph import StateGraph, MessagesState, START
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.prebuilt import ToolNode, tools_condition
 from langchain.chat_models import init_chat_model
 from langchain_core.tools import tool
 from langchain_core.messages import HumanMessage
+
+load_dotenv()
 
 @tool
 def multiply(left, right):

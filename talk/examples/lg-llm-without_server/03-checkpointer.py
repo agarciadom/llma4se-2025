@@ -1,9 +1,11 @@
 from typing import Any, Dict
+from dotenv import load_dotenv
 from langgraph.graph import StateGraph, MessagesState, START
 from langgraph.checkpoint.memory import InMemorySaver
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage
 
+load_dotenv()
 
 llm = init_chat_model(
     "gpt-4o-mini",
