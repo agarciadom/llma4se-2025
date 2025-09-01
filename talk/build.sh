@@ -7,6 +7,7 @@ build() {
     -t revealjs \
     --highlight-style zenburn \
     --css=slides.css \
+    --syntax-definition emfatic.xml \
     -o index.html \
     -s "$1"
   echo Slides built
@@ -16,10 +17,10 @@ wait_for_change() {
   echo Waiting for change...
   if which inotifywait &>/dev/null; then
     # For Linux
-    inotifywait -e modify *.md *.css
+    inotifywait -e modify *.md *.css *.xml
   else
     # For MacOS
-    fswatch -1 --event=Updated *.md *.css
+    fswatch -1 --event=Updated *.md *.css *.xml
   fi
 }
 

@@ -610,13 +610,128 @@ with CodeAgent(
 * Safer to run code on a sandbox like Docker
 * Rough edges: MCP tools didn't work, needed custom `Dockerfile`
 
+## Larger example: metamodelling
+
+* [MOSAICO](https://mosaico-project.eu/): reliable SE with agent collaborations
+* For WP1, we compared agent protocols
+
+![Multi-agent system for comparing protocols](img/emfatic-agents-dark.svg)
+
+## Example prompt
+
+```
+Please generate a metamodel of a simple library management system with three main concepts: Library, Book, and Author.
+
+Each Library has a name (String) and contains a collection of Books and a collection of Authors (both containment references). Each Book has a title (String) and a page count (int) and has a non-containment reference to its main Author. Each Author has a name (String) and age (int) and knows which Books they have written (non-containment reference to Books).
+
+The system should clearly distinguish between containment and non-containment relationships: A Library owns its Books and its Authors (deleting the Library deletes its Books and its Authors). Authors and Books reference each other but do not manage each other's lifecycles.
+```
+
+## Issue: niche languages
+
+* LMs can work well with popular languages (e.g. Python, Java),
+  but not so well with niche domain-specific languages
+* Usual options are:
+  * Generate examples for fine-tuning (expensive)
+  * Prompt engineering (e.g. few-shot)
+* We decided to try Smolagents instead:
+  * Tools to build an in-memory metamodel
+  * Tool to use [Jinja](https://jinja.palletsprojects.com/en/stable/) to produce Emfatic
+
+## Smolagents trace (I)
+
+It decides on an overall plan:
+
+```
+Thought: I will start by defining the metamodel for the library management system. I will create a base class 'LibraryItem' that both 'Book' and 'Author' can inherit from. This will help in reducing duplication of attributes and references. Then, I will define the 'Library', 'Book', and 'Author' classes with their respective attributes and references.
+
+1. Define the 'Model' package.
+2. Define the 'LibraryItem' base class.
+3. Define the 'Library' class with its attributes and containment references to 'Book' and 'Author'.
+4. Define the 'Book' class with its attributes and non-containment reference to 'Author'.
+5. Define the 'Author' class with its attributes and non-containment reference to 'Book'.
+
+Let's proceed step by step.
+```
+
+## Smolagents trace (II)
+
+It creates a Python program:
+
+```python
+# Step 1: Add the Model package
+model_package_uri = add_package_declaration(package_name="Model", namespace_uri="http://example.com/library/model")
+
+# Step 2: Define the LibraryItem base class
+library_item_class = add_class(class_name="LibraryItem", namespace_uri=model_package_uri, base_class_name="")
+add_attribute(namespace_uri=model_package_uri, class_name=library_item_class, attribute_name="name", attribute_type="String", attribute_cardinality="one")
+
+# Step 3: Define the Library class with containment references to Book and Author
+library_class = add_class(class_name="Library", namespace_uri=model_package_uri, base_class_name="LibraryItem")
+add_containment_reference(namespace_uri=model_package_uri, class_name=library_class, reference_name="books", reference_type="Book", reference_cardinality="many")
+add_containment_reference(namespace_uri=model_package_uri, class_name=library_class, reference_name="authors", reference_type="Author", reference_cardinality="many")
+
+# Step 4: Define the Book class with a non-containment reference to Author
+book_class = add_class(class_name="Book", namespace_uri=model_package_uri, base_class_name="LibraryItem")
+add_attribute(namespace_uri=model_package_uri, class_name=book_class, attribute_name="pageCount", attribute_type="int", attribute_cardinality="one")
+add_non_containment_reference(namespace_uri=model_package_uri, class_name=book_class, reference_name="author", reference_type="Author", reference_cardinality="one")
+
+# Step 5: Define the Author class with a non-containment reference to Book
+author_class = add_class(class_name="Author", namespace_uri=model_package_uri, base_class_name="LibraryItem")
+add_attribute(namespace_uri=model_package_uri, class_name=author_class, attribute_name="age", attribute_type="int", attribute_cardinality="one")
+add_non_containment_reference(namespace_uri=model_package_uri, class_name=author_class, reference_name="books", reference_type="Book", reference_cardinality="many")
+
+# Generate the Emfatic code
+emfatic_code = generate_emfatic()
+print(emfatic_code)
+```
+
+## Smolagents trace (III)
+
+It produces this (valid) Emfatic metamodel:
+
+```emfatic
+@namespace(uri="http://librarymanagement.com/1.0", prefix="p")
+package LibraryManagementSystem;
+
+class NamedElement {
+  attr String name;
+}
+class Library extends NamedElement {
+  val Book[*] books;
+  val Author[*] authors;
+}
+class Book {
+  attr String title;
+  attr int pageCount;
+  ref Author mainAuthor;
+}
+class Author extends NamedElement {
+  attr int age;
+  ref Book[*] booksWritten;
+}
+class Model {
+  val Library[*] libraries;
+}
+```
+
+## Caveats from experience
+
+* Tool functions need to be LM-friendly:
+  * Robust against sloppy usage
+  * Good error messages to feed back to LM
+* Trial-and-error to figure out typical mistakes
+  from LM, reminiscent of those from novice programmers
+* Significant token usage: best to use a local LM during
+  experimentation (used Qwen2.5-coder:32B)
+
 ## Reuse: agent protocols
 
 * Smolagents does not have a server of its own
 * Reusing an agent requires a protocol
 * One option: Google [A2A](https://github.com/a2aproject/A2A) (Agent-to-Agent) protocol
   * Mozilla.ai [any-agent](https://github.com/mozilla-ai/any-agent) can serve Smolagents via A2A
-* Quick plug: MOSAICO is looking at agent protocols
+* As said before, MOSAICO compared protocols
   * In-house vs A2A vs MCP
   * A2A ticks most boxes, but not all of them!
 
@@ -640,6 +755,8 @@ with CodeAgent(
 * We have introduced basic LM/agent definitions, workflow building blocks, and ReAct
 * Discussed the LangGraph framework, which supports explicit workflows or ReAct loops
 * Introduced the Smolagents framework, with its ReAct loop and Pythonic tool calling
+* Showed an example where Smolagents can chain many tool calls in
+  a single LM call, using a local LLM
 
 ## Thank you!
 
