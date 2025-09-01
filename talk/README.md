@@ -22,13 +22,7 @@ You will need to have the following tools installed to try them out:
 
 Some of the examples include an `.env.template` file.
 For those examples, you will need to copy `.env.template` to `.env` and customise it with your own tokens.
-You can then run the example with:
-
-```bash
-uv run --env-file .env example.py
-```
-
-The `lg-basic` example does not require an `.env` file, so it can be run with just:
+All examples can be run with:
 
 ```bash
 uv run example.py
