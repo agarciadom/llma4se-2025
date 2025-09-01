@@ -481,6 +481,30 @@ Let's try this out.
 
 ![Animation from [Smolagents](https://huggingface.co/docs/smolagents/conceptual_guides/react)](img/Agent_ManimCE.gif){width=80%}
 
+## Example: date sorting (I)
+
+![Initial prompt](img/smolagents-dates-01.png)
+
+## Example: date sorting (II)
+
+![First attempt at the code: third date isn't handled well](img/smolagents-dates-02.png){width=70%}
+
+## Example: date sorting (III)
+
+![Code is modified with an initial cleanup](img/smolagents-dates-03.png){width=70%}
+
+## Example: date sorting (IV)
+
+![Code is changed to conditionals and / presence is checked first](img/smolagents-dates-04.png){width=70%}
+
+## Example: date sorting (V)
+
+![Code is changed to test for the , first: it completes execution](img/smolagents-dates-05.png){width=70%}
+
+## Example: date sorting (VI)
+
+![Final result](img/smolagents-dates-06.png)
+
 ## Search: OpenAI + DDG MCP
 
 ```python
@@ -632,7 +656,7 @@ The system should clearly distinguish between containment and non-containment re
 * LMs can work well with popular languages (e.g. Python, Java),
   but not so well with niche domain-specific languages
 * Usual options are:
-  * Generate examples for fine-tuning (expensive)
+  * Generate examples for fine-tuning (expensive?)
   * Prompt engineering (e.g. few-shot)
 * We decided to try Smolagents instead:
   * Tools to build an in-memory metamodel
