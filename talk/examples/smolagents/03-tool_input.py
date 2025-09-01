@@ -1,9 +1,12 @@
 import os
 
+from dotenv import load_dotenv
 from smolagents import OpenAIServerModel, CodeAgent, MCPClient, Tool
 from smolagents.default_tools import VisitWebpageTool
 from mcp import StdioServerParameters
 from typing import Callable
+
+load_dotenv()
 
 model = OpenAIServerModel(
     model_id="gpt-4o-mini",

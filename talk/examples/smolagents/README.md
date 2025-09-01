@@ -11,5 +11,5 @@ To run these examples, you will need this initial preparation:
 You can then run each example with:
 
 ```shell
-uv run --env-file .env (example)
+uv run example.py
 ```

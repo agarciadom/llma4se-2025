@@ -1,7 +1,10 @@
 import os
 
+from dotenv import load_dotenv
 from smolagents import OpenAIServerModel, CodeAgent
 from smolagents.default_tools import DuckDuckGoSearchTool, VisitWebpageTool
+
+load_dotenv()
 
 model = OpenAIServerModel(
     model_id="gpt-4o-mini",
