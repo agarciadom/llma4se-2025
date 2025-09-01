@@ -1,13 +1,11 @@
 # Workshop materials
 
-# Talk slides
-
 This folder holds the [Pandoc](https://pandoc.org/)-based slides and materials for the LLMA4SE 2025 talk titled "Development of agentic applications
 with human-in-the-loop via LangGraph".
 
 ## Building the slides
 
-To build the slides, first install [Pandoc](https://pandoc.org/) and either the inotifytools (on Linux) or fswatch (on Mac/Windows).
+To build the slides, first install [Pandoc](https://pandoc.org/) and either the inotifytools (on Linux) or [fswatch](https://emcrisostomo.github.io/fswatch/) (on Mac/Windows).
 You can then run:
 
 ```bash
