@@ -724,6 +724,7 @@ class Model {
   from LM, reminiscent of those from novice programmers
 * Significant token usage: best to use a local LM during
   experimentation (used Qwen2.5-coder:32B)
+  * The [system prompt](https://github.com/huggingface/smolagents/blob/main/src/smolagents/prompts/code_agent.yaml) is already quite long
 
 ## Reuse: agent protocols
 

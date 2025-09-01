@@ -23,8 +23,8 @@ wait_for_change() {
   fi
 }
 
-build *.md
+build slides.md
 while :; do
   wait_for_change
-  build *.md
+  build slides.md
 done
