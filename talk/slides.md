@@ -1,6 +1,6 @@
 % From workflow-based to fully-agentic applications: smolagents and LangGraph
 % Antonio Garcia-Dominguez
-% LLMA4SE 2025 - September 2nd, 2025
+% LLMA4SE 2025 - September 2nd, 2025<br/> [https://github.com/agarciadom/llma4se-2025](https://github.com/agarciadom/llma4se-2025)
 
 # Introduction
 
