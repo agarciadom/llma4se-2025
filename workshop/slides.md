@@ -608,6 +608,17 @@ else:
     and you will be asked for a string
   * Approve with empty string, or give feedback
 
+# Open exercise: TDD
+
+## What to do
+
+* Port the TDD exercise from yesterday to LangGraph
+* Use a flow that first produces tests in natural language from
+  a spec, then has an interrupt to approve or provide feedback
+* You can then have a node for generating the code, then approve or
+  give feedback
+* Use structured outputs to separate parts
+
 # Conclusion
 
 ## What we covered
