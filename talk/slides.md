@@ -239,7 +239,7 @@ What happens if we try to talk to it?
 First interaction:
 
 ```text
-== Human Message =================================
+== Human Message ===============================
 Hello, my name is Antonio!
 == Ai Message ==================================
 Hello, Antonio! How can I assist you today?
@@ -247,7 +247,7 @@ Hello, Antonio! How can I assist you today?
 
 Second interaction:
 ```text
-== Human Message =================================
+== Human Message ===============================
 Do you remember my name?
 == Ai Message ==================================
 I don’t have the ability to remember personal information or previous interactions. Each conversation is treated independently. How can I assist you today?
@@ -451,7 +451,7 @@ Let's try this out.
 
 ## Reuse from other systems: LangGraph SDK
 
-* LangGraph Server wraps a graph around an API
+* LangGraph Server wraps a graph around [an API](https://langchain-ai.github.io/langgraph/cloud/reference/api/api_ref.html)
 * LangGraph provides SDKs with clients for the API
 * This allows for reusing an agent from a larger app (e.g. a web client, like Studio)
 * Checkpointing can be replaced with Postgres + Redis for persistence across restarts
@@ -468,7 +468,7 @@ Let's try this out.
 ## What is Smolagents?
 
 * Open-source agentic framework developed by HuggingFace (Apache 2.0 license)
-* Entirely based on the ReAct loop (no explicit workflows): focus on tool + step callback writing
+* Entirely based on the ReAct loop (no explicit workflows): focus on tool + step callbacks
 * Uses Python-based actions instead of JSON objects
   * Python runs in a limited environment
   * Can be further restricted (e.g. to run inside a VM)
