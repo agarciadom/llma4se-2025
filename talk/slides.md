@@ -8,6 +8,7 @@
 
 * Senior Lecturer in Software Engineering at the [Department of Computer Science](https://www.york.ac.uk/computer-science/) of the U. of York
 * Researcher at the [Automated Software Engineering](https://www.york.ac.uk/computer-science/research/groups/automated-software-engineering/) research group
+* Eclipse Committer ([Eclipse Epsilon](https://eclipse.dev/epsilon/), [Eclipse Hawk](https://eclipse.dev/hawk/))
 * Work package lead in the [MOSAICO EU project](https://mosaico-project.eu/)
 
 ## What is a Language Model?
