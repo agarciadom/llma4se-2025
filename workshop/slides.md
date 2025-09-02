@@ -1,5 +1,5 @@
 % Workshop: Development of agentic applications with human-in-the-loop via LangGraph
-% Antonio Garcia-Dominguez
+% Antonio Garcia-Dominguez<br/>University of York
 % LLMA4SE 2025 - September 2nd, 2025<br/> [https://github.com/agarciadom/llma4se-2025](https://github.com/agarciadom/llma4se-2025)
 
 # Preparation
