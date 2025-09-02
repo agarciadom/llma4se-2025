@@ -106,11 +106,11 @@ async def identify_destination(state: State) -> Dict[str, Any]:
 
 
 def ask_for_details(state: State) -> Dict[str, Any]:
-    if state.get('departure_country') is None:
+    if not state.get('departure_country'):
          return {"messages": [AIMessage(content='Which country will you be travelling from?')]}
-    elif state.get('departure_city') is None:
+    elif not state.get('departure_city'):
          return {"messages": [AIMessage(content='Which city will you be travelling from?')]}
-    elif state.get('destination_country') is None:
+    elif not state.get('destination_country'):
          return {"messages": [AIMessage(content='Which country will you be travelling to?')]}
     else:
         return {"messages": [AIMessage(content='Which city will you be travelling to?')]}

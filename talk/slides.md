@@ -786,10 +786,6 @@ class Model {
 
 ## Thank you!
 
-Materials available here:
-
-[Github repository](https://github.com/agarciadom/llma4se-2025)
-
 Contact me:
 
 a.garcia-dominguez AT york.ac.uk

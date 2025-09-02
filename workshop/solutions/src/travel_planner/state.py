@@ -16,9 +16,9 @@ class State(MessagesState):
 
 
 def details_known(state: State) -> bool:
-    return (
-        state.get('departure_country') is not None and
-        state.get('departure_city') is not None and
-        state.get('destination_country') is not None and
-        state.get('destination_city') is not None
+    return bool(
+        state.get('departure_country') and
+        state.get('departure_city') and
+        state.get('destination_country') and
+        state.get('destination_city')
     )

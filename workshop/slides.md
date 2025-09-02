@@ -420,8 +420,9 @@ You should be able to see the state changes from interaction to interaction.
 
 ```python
 def ask_for_details(state: State) -> Dict[str, Any]:
-    if state.get('departure_country') is None:
+    if not state.get('departure_country'):
          return {"messages": [AIMessage(content='Which country will you be travelling from?')]}
+    # write the other cases
 ```
 
 ## destination_identified node
@@ -432,7 +433,7 @@ def ask_for_details(state: State) -> Dict[str, Any]:
 ## details_known edge
 
 * We need a function to decide where to go from `identify_destination`
-* Write the body of this function, so it returns `True` if there are non-`None` values for the departure and destination keys
+* Write the body of this function, so it returns `True` if we have non-empty strings for the departure and destination keys
 
 ```python
 def details_known(state: State) -> bool:
@@ -631,10 +632,6 @@ else:
   * Human-in-the-loop with interrupts
 
 ## Thank you!
-
-Materials available here:
-
-[Github repository](https://github.com/agarciadom/llma4se-2025)
 
 Contact me:
 
